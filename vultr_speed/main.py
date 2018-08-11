@@ -14,7 +14,7 @@ target_url = "https://www.vultr.com/faq/"
 
 def get_geo_link():
     rsp = requests.get(target_url)
-    soup = BeautifulSoup(rsp.content)
+    soup = BeautifulSoup(rsp.content, "html.parser")
     geo_map = []
     for elem in soup.select('#speedtest_v4 > tr'):
         all_tds = elem.findAll('td')
@@ -39,7 +39,7 @@ def speed_test(geo_loc, ping_url):
     return output
 
 
-if __name__ == '__main__':
+def main():
     geo_map = get_geo_link()
 
     print("="*10 + "start speed testing..." + "="*10)
@@ -53,3 +53,7 @@ if __name__ == '__main__':
         print
 
     print("="*10 + "end speed testing..." + "="*10)
+
+
+if __name__ == '__main__':
+    main()
