@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
         name = "vultr_speed",
-        version = "0.2",
+        version = "0.5",
         author = "ruifengyun",
         author_email = "rfyiamcool@163.com",
         description = "get fast vultr node for you",

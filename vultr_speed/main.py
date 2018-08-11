@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import signal
 import json
 import sys
 import subprocess
@@ -9,12 +10,24 @@ from bs4 import BeautifulSoup
 from multiprocessing import Pool
 
 
+signal.signal(signal.SIGINT, exit)
+signal.signal(signal.SIGTERM, exit)
 target_url = "https://www.vultr.com/faq/"
 
 
+def exit(signum, frame):
+    print('stop scan')
+    exit()
+
+
 def get_geo_link():
-    rsp = requests.get(target_url)
-    soup = BeautifulSoup(rsp.content, "html.parser")
+    try:
+        rsp = requests.get(target_url, timeout=5)
+    except:
+        print('get vultr api error')
+        exit()
+
+    soup = BeautifulSoup(rsp.content, "lxml")
     geo_map = []
     for elem in soup.select('#speedtest_v4 > tr'):
         all_tds = elem.findAll('td')
@@ -40,19 +53,20 @@ def speed_test(geo_loc, ping_url):
 
 
 def main():
-    geo_map = get_geo_link()
+    try:
+        geo_map = get_geo_link()
 
-    print("="*10 + "start speed testing..." + "="*10)
+        print("="*10 + "start speed testing..." + "="*10)
+        for geo_info in geo_map:
+            geo_loc = geo_info[0]
+            geo_addr = geo_info[1]
+            speed_out = speed_test(geo_loc, geo_addr)
+            print("\ntesting [%s] %s result:\n%s" % (geo_loc, geo_addr, speed_out))
 
-    for geo_info in geo_map:
-        geo_loc = geo_info[0]
-        geo_addr = geo_info[1]
-        speed_out = speed_test(geo_loc, geo_addr)
-        print
-        print("testing [%s] %s result: %s \n" % (geo_loc, geo_addr, speed_out))
-        print
+        print("="*10 + "end speed testing..." + "="*10)
 
-    print("="*10 + "end speed testing..." + "="*10)
+    except:
+        print("exit")
 
 
 if __name__ == '__main__':
